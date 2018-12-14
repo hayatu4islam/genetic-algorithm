@@ -1,6 +1,6 @@
 class Species:
     def __init__(self, position, direction):
-        self.pos_x, self.pos_y = position
+        self.x_position, self.y_position = position
         self.direction = direction
         self.energy = 20
         self.age = 0
@@ -43,8 +43,8 @@ class Species:
         pass
     
 class Prey(Species):
-    def __init__(self):
-        super.__init__(self)
+    def __init__(self,position, direction):
+        super().__init__(position, direction)
     
     def get_state(self, world):
         if(self.direction == 'N'):
@@ -96,3 +96,7 @@ class Prey(Species):
             except IndexError:
                 self.state['R2'] = 'Empty'
     
+class Predator(Species):
+    def __init__(self,position, direction):
+        super().__init__(position, direction)
+     
