@@ -1,11 +1,11 @@
 import random
-
+# Copywrite James Kayes © 2018
+# Genes represent an action for each agent to take for each of the possible states that the agent can be in.
 
 def rank_based_selection(population):
     rank_proportions = [0.35, 0.2, 0.1, 0.08, 0.05, 0.04, 0.03, 0.025, 0.015, 0.01]
     remaining_probability = 1.0 - sum(rank_proportions)
     remaining_items = float(len(population) - len(rank_proportions))
-    print(round(sum(rank_proportions), 2))
     # Applying this same probability to all values ranked lower than the number of items in the rank_proportions list:
     lower_rank_prob = remaining_probability/remaining_items
     for value in population[10:]:
@@ -19,24 +19,21 @@ def rank_based_selection(population):
         if(random_value <= total): # Select this rank for breeding.
             return rank_index
 
+    return (len(rank_proportions)-1) # Last element
+
 def crossover(a_genes, b_genes):
     result = []
-    layer_num = 0
-    for layer_genes in a_genes:
-        result.append([])
-        gene_num = 0
-        for a_gene in layer_genes:
-            if(random.random() > 0.5):
-                result[layer_num].append(a_gene)
-            else:
-                result[layer_num].append(b_genes[layer_num][gene_num])
-            gene_num += 1
-        layer_num += 1
+    # Uniform crossover with randomization such that each gene has an 50% chance of coming from either parent:
+    for gene_index in range(len(a_genes)):
+        if(random.random() > 0.5):
+            result.append(a_genes[gene_index])
+        else:
+            result.append(b_genes[gene_index])
     return result
 
-def mutate(genes, rate=0.01):
-    for layer_indx in range(len(genes)):
-        for gene_indx in range(len(genes[layer_indx])):
-            if(random.random() <= rate):
-                genes[layer_indx][gene_indx] = (random.randint(0, layer_indx), random.randint(0, len(genes[0])-1))
+def mutate(genes, rate=0.015, possible_actions=3):
+    for gene_index in range(len(genes)):
+        # Randomize this gene:
+        if(random.random() <= rate):
+            genes[gene_index] = random.randint(0, possible_actions-1)
     return genes

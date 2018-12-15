@@ -13,6 +13,8 @@ world = []
 prey_list = []
 predator_list = []
 food_list = []
+
+# These will hold a list of dictionaries with 2 entries: The specimens genes and its fitness:
 prey_genes = []
 predator_genes = [] 
 
@@ -173,8 +175,33 @@ while not gameExit:
         print('Applying crossover/mutation with rank based selection to generate new genes')
         sorted_prey_genes = sorted(prey_genes, key = lambda item: item['fitness'], reverse=True)
         sorted_predator_genes = sorted(predator_genes, key = lambda item: item['fitness'], reverse=True)
-        print(rank_based_selection(sorted_prey_genes))
-        print(rank_based_selection(sorted_predator_genes))
+        for prey_index in range(len(prey_genes)):
+            # Select rank acording to rank based selection, and remove from the list to prevent breeding with itself to increase gene diversity:
+            a_rank = rank_based_selection(sorted_prey_genes)
+            prey_dict = sorted_prey_genes.pop(a_rank)
+            prey_genes_a = prey_dict['genes']
+            # Getting the rank for the second parent from the remaining genes:
+            prey_genes_b = sorted_prey_genes[rank_based_selection(sorted_prey_genes)]['genes']
+
+            # Crossover applied to create a new set of genes for the next generation:
+            prey_genes[prey_index]['genes'] = mutate(crossover(prey_genes_a, prey_genes_b))
+
+            # Re-inserting removed genes in the correct place:
+            sorted_prey_genes.insert(a_rank, prey_dict)
+
+        for predator_index in range(len(predator_genes)):
+            # Select rank acording to rank based selection, and remove from the list to prevent breeding with itself to increase gene diversity:
+            a_rank = rank_based_selection(sorted_predator_genes)
+            predator_dict = sorted_predator_genes.pop(a_rank)
+            predator_genes_a = predator_dict['genes']
+            # Getting the rank for the second parent from the remaining genes:
+            predator_genes_b = sorted_predator_genes[rank_based_selection(sorted_predator_genes)]['genes']
+
+            # Crossover and mutation applied to create a new set of genes for the next generation:
+            predator_genes[predator_index]['genes'] = mutate(crossover(predator_genes_a, predator_genes_b))
+
+            # Re-inserting removed genes in the correct place:
+            sorted_predator_genes.insert(a_rank, predator_dict)
         generation += 1
         food_list.clear()
         new_board()
