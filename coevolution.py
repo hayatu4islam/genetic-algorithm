@@ -1,6 +1,7 @@
 # Copywrite James Kayes © 2018
 import pygame
 import random
+import itertools
 from species import *
 
 prey_colour = (255, 0, 0)
@@ -23,7 +24,7 @@ def spawn_blocks(world):
                     world[x].append('Empty')
         x += 1
 
-def spawn_objects(world, pred_list, prey_list, food_count=100, prey_count=20, predator_count=10):
+def spawn_objects(world, pred_list, prey_list, food_count=80, prey_count=50, predator_count=25):
     world_width = len(world)-1
     world_height = len(world[0])-1
 
@@ -54,6 +55,10 @@ def spawn_objects(world, pred_list, prey_list, food_count=100, prey_count=20, pr
         world[random_x][random_y] = 'Predator'
         pred_list.append(Predator((random_x, random_y), 'N'))
 
+# Clear block at this position:
+def clear(position):
+    pygame.draw.rect(gameDisplay, (0,0,0), [position[0], position[1], 10, 10])
+
 def clear_world():
     for prey in prey_list:
         pygame.draw.rect(gameDisplay, (0,0,0), [prey.x_position*10, prey.y_position*10, 10, 10])
@@ -69,6 +74,15 @@ def draw_world():
         pygame.draw.rect(gameDisplay, predator_colour, [predator.x_position*10, predator.y_position*10, 10, 10])
     for x_position, y_position in food_list:
         pygame.draw.rect(gameDisplay, food_colour, [x_position*10, y_position*10, 10, 10])
+
+def update_world():
+    for prey in prey_list:
+        clear((prey.x_position, prey.y_position))
+        prey.get_state(world)
+    for predator in predator_list:
+        clear((predator.x_position, predator.y_position))
+    for position in food_list:
+        clear(position)
 
 pygame.init()
 
@@ -86,6 +100,8 @@ food_list = []
 x = 0
 spawn_blocks(world)
 spawn_objects(world, predator_list, prey_list)
+
+print([''.join(item) for item in list(itertools.product("BPYEF", repeat=5))])
 # Draw blocks, we only need to do this once as they don't change positions:
 for x_pos in range(len(world)):
     for y_pos in range(len(world[0])):
