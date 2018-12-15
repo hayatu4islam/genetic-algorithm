@@ -8,7 +8,7 @@ class Species:
         self.direction = direction
         self.energy = 20
         self.age = 0
-        self.state_action_dict = {} # This will determine the action for the agent to take for each and every possible state.
+        self.state_action_dict = {} # This is a dictionary from every possible state to the action that should be taken in this state.
         self.genes = genes
         self.state_string = ''
 
@@ -17,8 +17,9 @@ class Species:
         for state in possible_states:
             self.state_action_dict[state] = self.genes[i]
             i += 1
-
+    
     def build_state_string(self):
+        self.state_string = ''
         # Building string acording to state dictionary:
         for key in sorted(self.state.keys()):
             character = 'B'
@@ -46,47 +47,49 @@ class Species:
         
     def move_left(self):
         self.energy -= 0.1
-        if(self.state['L1'] != 'Block'): 
-            if(self.direction == 'N'):
-                self.direction = 'W'
+        if(self.direction == 'N'):
+            self.direction = 'W'
+            if(self.state['L1'] != 'Block'): 
                 self.x_position -= 1
-            elif(self.direction == 'E'):
-                self.direction = 'N'
+        elif(self.direction == 'E'):
+            self.direction = 'N'
+            if(self.state['L1'] != 'Block'): 
                 self.y_position -= 1
-            elif(self.direction == 'S'):
-                self.direction = 'E'
+        elif(self.direction == 'S'):
+            self.direction = 'E'
+            if(self.state['L1'] != 'Block'): 
                 self.x_position += 1
-            elif(self.direction == 'W'):
-                self.direction = 'S'
+        elif(self.direction == 'W'):
+            self.direction = 'S'
+            if(self.state['L1'] != 'Block'): 
                 self.y_position += 1
 
     def move_right(self):
         self.energy -= 0.1
-        if(self.state['R1'] != 'Block'): 
-            if(self.direction == 'N'):
-                self.direction = 'E'
+        if(self.direction == 'N'):
+            self.direction = 'E'
+            if(self.state['R1'] != 'Block'): 
                 self.x_position += 1
-            elif(self.direction == 'E'):
-                self.direction = 'S'
+        elif(self.direction == 'E'):
+            self.direction = 'S'
+            if(self.state['R1'] != 'Block'): 
                 self.y_position += 1
-            elif(self.direction == 'S'):
-                self.direction = 'W'
+        elif(self.direction == 'S'):
+            self.direction = 'W'
+            if(self.state['R1'] != 'Block'): 
                 self.x_position -= 1
-            elif(self.direction == 'W'):
-                self.direction = 'N'
+        elif(self.direction == 'W'):
+            self.direction = 'N'
+            if(self.state['R1'] != 'Block'): 
                 self.y_position -= 1
 
     def stay_still(self):
         pass
     
 class Prey(Species):
-    def __init__(self,position, direction):
-        super().__init__(position, direction)
-    
-    def build_state_action_dict_from_genes(self):
-        for gene in self.genes:
-            
-            
+    def __init__(self, genes, position, direction):
+        super().__init__(genes, position, direction)         
+        
     def update_state(self, world):
         if(self.direction == 'N'):
             self.state['F1'] = world[self.x_position][self.y_position-1]
@@ -145,10 +148,8 @@ class Prey(Species):
             self.move_left()
         elif(self.state_action_dict[self.state_string] == 2):
             self.move_right()
-        elif(self.state_action_dict[self.state_string] == 3):
-            self.move_back()
 
 class Predator(Species):
-    def __init__(self,position, direction):
-        super().__init__(position, direction)
+    def __init__(self, genes, position, direction):
+        super().__init__(genes, position, direction)
      

@@ -8,8 +8,17 @@ prey_colour = (255, 0, 0)
 predator_colour = (255, 0, 255)
 food_colour = (0, 255, 0)
 block_colour = (100, 100, 100)
+world = []
+prey_list = []
+prey_genes = []
+predator_list = []
+predator_genes = []
+food_list = []
 
-def spawn_blocks(world):
+prey_count = 50
+predator_count = 25
+food_count = 80
+def spawn_blocks():
     x = 0
     for x_pos in range(0, 800, 10):
         world.append([])
@@ -24,7 +33,7 @@ def spawn_blocks(world):
                     world[x].append('Empty')
         x += 1
 
-def spawn_objects(world, pred_list, prey_list, food_count=80, prey_count=50, predator_count=25):
+def spawn_life():
     world_width = len(world)-1
     world_height = len(world[0])-1
 
@@ -37,27 +46,27 @@ def spawn_objects(world, pred_list, prey_list, food_count=80, prey_count=50, pre
         world[random_x][random_y] = 'Food'
         food_list.append((random_x, random_y))
 
-    for prey in range(prey_count):
+    for prey_index in range(prey_count):
         random_x = random.randint(0, world_width)
         random_y = random.randint(0, world_height)
         while(world[random_x][random_y] != 'Empty'):
             random_x = random.randint(0, world_width)
             random_y = random.randint(0, world_height)
         world[random_x][random_y] = 'Prey'
-        prey_list.append(Prey((random_x, random_y), 'N'))
-    
-    for predator in range(predator_count):
+        prey_list.append(Prey(prey_genes[prey_index], (random_x, random_y), 'N'))
+
+    for predator_index in range(predator_count):
         random_x = random.randint(0, world_width)
         random_y = random.randint(0, world_height)
         while(world[random_x][random_y] != 'Empty'):
             random_x = random.randint(0, world_width)
             random_y = random.randint(0, world_height)
         world[random_x][random_y] = 'Predator'
-        pred_list.append(Predator((random_x, random_y), 'N'))
-
+        predator_list.append(Predator(predator_genes[predator_index], (random_x, random_y), 'N'))
+        
 # Clear block at this position:
 def clear(position):
-    pygame.draw.rect(gameDisplay, (0,0,0), [position[0], position[1], 10, 10])
+    pygame.draw.rect(gameDisplay, (0,0,0), [position[0]*10, position[1]*10, 10, 10])
 
 def clear_world():
     for prey in prey_list:
@@ -75,15 +84,26 @@ def draw_world():
     for x_position, y_position in food_list:
         pygame.draw.rect(gameDisplay, food_colour, [x_position*10, y_position*10, 10, 10])
 
-def update_world():
+def update():
     for prey in prey_list:
         clear((prey.x_position, prey.y_position))
-        prey.get_state(world)
+        prey.update_state(world)
+        prey.take_action()
+    '''
     for predator in predator_list:
         clear((predator.x_position, predator.y_position))
-    for position in food_list:
-        clear(position)
+        predator.update_state(world)
+        predator.take_action()
+    '''
 
+def initiaise_genes(count, genome_length=3125):
+    genes_list = []
+    for i in range(count):
+        genes_list.append([])
+        for gene in range(genome_length):
+            genes_list[i].append(random.randint(0,2))
+    return genes_list
+    
 pygame.init()
 
 gameDisplay = pygame.display.set_mode((800,600))
@@ -93,16 +113,15 @@ pygame.display.set_icon(window_icon)
 
 gameExit = False
 
-world = []
-prey_list = []
-predator_list = []
-food_list = []
 x = 0
-spawn_blocks(world)
-spawn_objects(world, predator_list, prey_list)
+spawn_blocks()
+if(len(prey_genes) == 0):
+    prey_genes = initiaise_genes(prey_count)
+if(len(predator_genes) == 0):
+    predator_genes = initiaise_genes(predator_count)
+spawn_life()
 
-print([''.join(item) for item in list(itertools.product("BPYEF", repeat=5))])
-# Draw blocks, we only need to do this once as they don't change positions:
+# Draw blockades, we only need to do this once as they don't change positions:
 for x_pos in range(len(world)):
     for y_pos in range(len(world[0])):
         if(world[x_pos][y_pos] == 'Block'):
@@ -117,7 +136,7 @@ while not gameExit:
             gameExit = True
 
     clear_world()
-
+    update()
     draw_world()
     pygame.display.update()
     
