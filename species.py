@@ -1,23 +1,23 @@
 import itertools
-from collections import OrderedDict
 
 class Species:
     def __init__(self, genes, position, direction):
         self.x_position, self.y_position = position
         self.state = {}
         self.direction = direction
-        self.energy = 20
+        self.energy = 200
         self.age = 0
         self.state_action_dict = {} # This is a dictionary from every possible state to the action that should be taken in this state.
         self.genes = genes
         self.state_string = ''
+        self.dead = False
 
         possible_states = [''.join(item) for item in list(itertools.product('BPYEF', repeat=5))]
         i = 0
         for state in possible_states:
             self.state_action_dict[state] = self.genes[i]
             i += 1
-    
+
     def build_state_string(self):
         self.state_string = ''
         # Building string acording to state dictionary:
@@ -34,7 +34,6 @@ class Species:
             self.state_string += character
 
     def move_forward(self):
-        self.energy -= 0.1
         if(self.state['F1'] != 'Block'):
             if(self.direction == 'N'):
                 self.y_position -= 1
@@ -44,9 +43,8 @@ class Species:
                 self.y_position += 1
             elif(self.direction == 'W'):
                 self.x_position -= 1
-        
+
     def move_left(self):
-        self.energy -= 0.1
         if(self.direction == 'N'):
             self.direction = 'W'
             if(self.state['L1'] != 'Block'): 
@@ -65,7 +63,6 @@ class Species:
                 self.y_position += 1
 
     def move_right(self):
-        self.energy -= 0.1
         if(self.direction == 'N'):
             self.direction = 'E'
             if(self.state['R1'] != 'Block'): 
@@ -83,13 +80,68 @@ class Species:
             if(self.state['R1'] != 'Block'): 
                 self.y_position -= 1
 
-    def stay_still(self):
-        pass
+    def die(self):
+        print(str(self) + 'died at age: ' + str(self.age))
+        self.dead = True
     
 class Prey(Species):
     def __init__(self, genes, position, direction):
         super().__init__(genes, position, direction)         
+    
+    def stay_still(self):
+        self.energy -= 0.05
+
+    def take_action(self, food_list):
+        if(self.state_action_dict[self.state_string] == 0):
+            self.move_forward(food_list)
+        elif(self.state_action_dict[self.state_string] == 1):
+            self.move_left(food_list)
+        elif(self.state_action_dict[self.state_string] == 2):
+            self.move_right(food_list)
+        elif(self.state_action_dict[self.state_string] == 3):
+            self.stay_still()
+        self.age += 1
+
+    def move_forward(self, food_list):
+        super().move_forward()
+        self.energy -= 0.1
+        if(self.state['F1'] == 'Predator'):
+            self.die()
+        elif(self.state['F1'] == 'Food'):
+            self.energy += 50
+            food_index = 0
+            for food_x, food_y, eaten in food_list:
+                if(food_x == self.x_position and food_y == self.y_position):
+                    food_list[food_index] = (-1, -1, True)
+                food_index += 1
+    
+    def move_left(self, food_list):
+        super().move_left()
+        self.energy -= 0.1
+        if(self.state['L1'] == 'Predator'):
+            self.die()
+        elif(self.state['L1'] == 'Food'):
+            self.energy += 50
+            food_index = 0
+            for food_x, food_y, eaten in food_list:
+                if(food_x == self.x_position and food_y == self.y_position):
+                    food_list[food_index] = (-1, -1, True)
+                food_index += 1
         
+    
+    def move_right(self, food_list):
+        super().move_right()
+        self.energy -= 0.1
+        if(self.state['R1'] == 'Predator'):
+            self.die()
+        elif(self.state['R1'] == 'Food'):
+            self.energy += 50
+            food_index = 0
+            for food_x, food_y, eaten in food_list:
+                if(food_x == self.x_position and food_y == self.y_position):
+                    food_list[food_index] = (-1, -1, True)
+                food_index += 1
+    
     def update_state(self, world):
         if(self.direction == 'N'):
             self.state['F1'] = world[self.x_position][self.y_position-1]
@@ -131,25 +183,119 @@ class Prey(Species):
             self.state['F1'] = world[self.x_position-1][self.y_position]
             self.state['L1'] = world[self.x_position][self.y_position+1]
             try:
-                self.state['L2'] = world[self.x_position-2][self.y_position+2]
+                self.state['L2'] = world[self.x_position][self.y_position+2]
             except IndexError:
                 self.state['L2'] = 'Empty'
-            self.state['R1'] = world[self.x_position+1][self.y_position-1]
+            self.state['R1'] = world[self.x_position][self.y_position-1]
             try:
-                self.state['R2'] = world[self.x_position+2][self.y_position-2]
+                self.state['R2'] = world[self.x_position][self.y_position-2]
             except IndexError:
                 self.state['R2'] = 'Empty'
         self.build_state_string()
+        if(self.energy <= 0):
+            self.die()
      
-    def take_action(self):
-        if(self.state_action_dict[self.state_string] == 0):
-            self.move_forward()
-        elif(self.state_action_dict[self.state_string] == 1):
-            self.move_left()
-        elif(self.state_action_dict[self.state_string] == 2):
-            self.move_right()
 
 class Predator(Species):
     def __init__(self, genes, position, direction):
         super().__init__(genes, position, direction)
-     
+    
+    def stay_still(self):
+        self.energy -= 0.05
+
+    def take_action(self, prey_list):
+        if(self.state_action_dict[self.state_string] == 0):
+            self.move_forward(prey_list)
+        elif(self.state_action_dict[self.state_string] == 1):
+            self.move_left(prey_list)
+        elif(self.state_action_dict[self.state_string] == 2):
+            self.move_right(prey_list)
+        elif(self.state_action_dict[self.state_string] == 3):
+            self.stay_still()
+        self.age += 1
+
+    def move_forward(self, prey_list):
+        super().move_forward()
+        self.energy -= 0.1
+        if(self.state['F1'] == 'Prey'):
+            self.energy += 50
+            prey_index = 0
+            for prey in prey_list:
+                if(prey.x_position == self.x_position and prey.y_position == self.y_position):
+                    prey_list[prey_index].dead = True
+                prey_index += 1
+    
+    def move_left(self, prey_list):
+        super().move_left()
+        self.energy -= 0.1
+        if(self.state['F1'] == 'Prey'):
+            self.energy += 50
+            prey_index = 0
+            for prey in prey_list:
+                if(prey.x_position == self.x_position and prey.y_position == self.y_position):
+                    prey_list[prey_index].dead = True
+                prey_index += 1
+        
+    def move_right(self, prey_list):
+        super().move_right()
+        self.energy -= 0.1
+        if(self.state['F1'] == 'Prey'):
+            self.energy += 50
+            prey_index = 0
+            for prey in prey_list:
+                if(prey.x_position == self.x_position and prey.y_position == self.y_position):
+                    prey_list[prey_index].dead = True
+                prey_index += 1
+
+    def update_state(self, world):
+        if(self.direction == 'N'):
+            self.state['F1'] = world[self.x_position][self.y_position-1]
+            self.state['L1'] = world[self.x_position-1][self.y_position]
+            try:
+                self.state['F2'] = world[self.x_position][self.y_position-2]
+            except IndexError:
+                self.state['F2'] = 'Empty'
+            self.state['R1'] = world[self.x_position+1][self.y_position]
+            try:
+                self.state['F3'] = world[self.x_position][self.y_position-3]
+            except IndexError:
+                self.state['F3'] = 'Empty'
+        elif(self.direction == 'E'):
+            self.state['F1'] = world[self.x_position+1][self.y_position]
+            self.state['L1'] = world[self.x_position][self.y_position-1]
+            try:
+                self.state['F2'] = world[self.x_position+2][self.y_position]
+            except IndexError:
+                self.state['F2'] = 'Empty'   
+            self.state['R1'] = world[self.x_position][self.y_position+1]
+            try:
+                self.state['F3'] = world[self.x_position+3][self.y_position]
+            except IndexError:
+                self.state['F3'] = 'Empty'
+        elif(self.direction == 'S'):
+            self.state['F1'] = world[self.x_position][self.y_position+1]
+            self.state['L1'] = world[self.x_position+1][self.y_position]
+            try:
+                self.state['F2'] = world[self.x_position][self.y_position+2]
+            except IndexError:
+                self.state['F2'] = 'Empty'
+            self.state['R1'] = world[self.x_position-1][self.y_position]
+            try:
+                self.state['F3'] = world[self.x_position][self.y_position+3]
+            except IndexError:
+                self.state['F3'] = 'Empty'
+        elif(self.direction == 'W'):
+            self.state['F1'] = world[self.x_position-1][self.y_position]
+            self.state['L1'] = world[self.x_position][self.y_position+1]
+            try:
+                self.state['F2'] = world[self.x_position-2][self.y_position]
+            except IndexError:
+                self.state['F2'] = 'Empty'
+            self.state['R1'] = world[self.x_position][self.y_position-1]
+            try:
+                self.state['F3'] = world[self.x_position-3][self.y_position]
+            except IndexError:
+                self.state['F3'] = 'Empty'
+        self.build_state_string()
+        if(self.energy <= 0):
+            self.die()
