@@ -1,9 +1,23 @@
 import random
 
+
 def rank_based_selection(population):
     rank_proportions = [0.35, 0.2, 0.1, 0.08, 0.05, 0.04, 0.03, 0.025, 0.015, 0.01]
-    for specimen in sorted(population.values()):
-        print(specimen['fitness'])
+    remaining_probability = 1.0 - sum(rank_proportions)
+    remaining_items = float(len(population) - len(rank_proportions))
+    print(round(sum(rank_proportions), 2))
+    # Applying this same probability to all values ranked lower than the number of items in the rank_proportions list:
+    lower_rank_prob = remaining_probability/remaining_items
+    for value in population[10:]:
+        rank_proportions.append(lower_rank_prob)
+
+    # Get a random rank from the genes acording to the rank_proportions distribution above:
+    random_value = random.random()
+    total = 0.0
+    for rank_index in range(len(rank_proportions)):
+        total += rank_proportions[rank_index] # Probability of choosing this rank
+        if(random_value <= total): # Select this rank for breeding.
+            return rank_index
 
 def crossover(a_genes, b_genes):
     result = []

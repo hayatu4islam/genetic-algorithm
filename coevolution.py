@@ -80,26 +80,22 @@ def draw_world():
     for prey in prey_list:
         if(not prey.dead):
             pygame.draw.rect(gameDisplay, prey_colour, [prey.x_position*10, prey.y_position*10, 10, 10])
-        else:
-            prey_list.remove(prey) 
 
     for predator in predator_list:
         if(not predator.dead):
             pygame.draw.rect(gameDisplay, predator_colour, [predator.x_position*10, predator.y_position*10, 10, 10])
-        else:
-            predator_list.remove(predator)
 
     for item in food_list:
         x_position, y_position, eaten = item
         if(not eaten):
             pygame.draw.rect(gameDisplay, food_colour, [x_position*10, y_position*10, 10, 10])
-        else:
-            food_list.remove(item)
 
 def update():
     for food_x, food_y, food_eaten in food_list:
         if(food_eaten == True):
             clear((food_x, food_y))
+            food_list.remove((food_x, food_y, food_eaten))
+
     for prey in prey_list:
         clear((prey.x_position, prey.y_position))
         if(not prey.dead):
@@ -108,8 +104,10 @@ def update():
             # Update world:
             world[prey.x_position][prey.y_position] = 'Prey'
         else:
-            # Add to genes list:
-            prey_genes.append({'genes': prey.genes, 'fitness': prey.age})
+            # Add fitness to genes: 
+            for specimen in prey_genes:
+                if(specimen['genes'] == prey.genes):
+                    specimen['fitness'] = prey.age
             world[prey.x_position][prey.y_position] = 'Empty'
             prey_list.remove(prey)
 
@@ -121,8 +119,10 @@ def update():
             # Update world:
             world[predator.x_position][predator.y_position] = 'Predator'
         else:
-            # Add to genes list:
-            predator_genes.append({'genes': predator.genes, 'fitness': predator.age})
+            # Add fitness to genes: 
+            for specimen in predator_genes:
+                if(specimen['genes'] == predator.genes):
+                    specimen['fitness'] = predator.age
             world[predator.x_position][predator.y_position] = 'Empty'
             predator_list.remove(predator)
 
@@ -171,6 +171,10 @@ while not gameExit:
     if(len(prey_list) == 0 and len(predator_list) == 0):
         print('Generation ' + str(generation) + ' complete')
         print('Applying crossover/mutation with rank based selection to generate new genes')
+        sorted_prey_genes = sorted(prey_genes, key = lambda item: item['fitness'], reverse=True)
+        sorted_predator_genes = sorted(predator_genes, key = lambda item: item['fitness'], reverse=True)
+        print(rank_based_selection(sorted_prey_genes))
+        print(rank_based_selection(sorted_predator_genes))
         generation += 1
         food_list.clear()
         new_board()
