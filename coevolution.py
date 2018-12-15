@@ -3,6 +3,7 @@ import pygame
 import random
 import itertools
 from species import *
+from gene_functions import *
 
 prey_colour = (255, 0, 0)
 predator_colour = (255, 0, 255)
@@ -10,26 +11,32 @@ food_colour = (0, 255, 0)
 block_colour = (100, 100, 100)
 world = []
 prey_list = []
-prey_genes = []
 predator_list = []
-predator_genes = []
 food_list = []
+prey_genes = []
+predator_genes = [] 
 
 prey_count = 50
 predator_count = 20
 food_count = 80
-def spawn_blocks():
+
+# Sets the initial world up with the boundary and and random blocks on the screen:
+def new_board():
+    world.clear()
     x = 0
-    for x_pos in range(0, 800, 10):
+    for x_position in range(0, 800, 10):
         world.append([])
-        for y_pos in range(0, 600, 10):
+        for y_position in range(0, 600, 10):
             # Boundry:
-            if(y_pos == 0 or x_pos == 0 or y_pos == 590 or x_pos == 790):
+            if(y_position == 0 or x_position == 0 or y_position == 590 or x_position == 790):
+                pygame.draw.rect(gameDisplay, block_colour, [x_position, y_position, 10, 10])
                 world[x].append('Block')
             else:
                 if(random.random() < 0.15):
+                    pygame.draw.rect(gameDisplay, block_colour, [x_position, y_position, 10, 10])
                     world[x].append('Block')
                 else:
+                    pygame.draw.rect(gameDisplay, (0,0,0), [x_position, y_position, 10, 10])
                     world[x].append('Empty')
         x += 1
 
@@ -53,7 +60,8 @@ def spawn_life():
             random_x = random.randint(0, world_width)
             random_y = random.randint(0, world_height)
         world[random_x][random_y] = 'Prey'
-        prey_list.append(Prey(prey_genes[prey_index], (random_x, random_y), 'N'))
+        prey_list.append(Prey(prey_genes[prey_index]['genes'], (random_x, random_y), 'N'))
+
     for predator_index in range(predator_count):
         random_x = random.randint(0, world_width)
         random_y = random.randint(0, world_height)
@@ -61,7 +69,7 @@ def spawn_life():
             random_x = random.randint(0, world_width)
             random_y = random.randint(0, world_height)
         world[random_x][random_y] = 'Predator'
-        predator_list.append(Predator(predator_genes[predator_index], (random_x, random_y), 'N'))
+        predator_list.append(Predator(predator_genes[predator_index]['genes'], (random_x, random_y), 'N'))
         
 # Clear block at this position:
 def clear(position):
@@ -73,7 +81,7 @@ def draw_world():
         if(not prey.dead):
             pygame.draw.rect(gameDisplay, prey_colour, [prey.x_position*10, prey.y_position*10, 10, 10])
         else:
-            prey_list.remove(prey)
+            prey_list.remove(prey) 
 
     for predator in predator_list:
         if(not predator.dead):
@@ -99,6 +107,11 @@ def update():
             prey.take_action(food_list)
             # Update world:
             world[prey.x_position][prey.y_position] = 'Prey'
+        else:
+            # Add to genes list:
+            prey_genes.append({'genes': prey.genes, 'fitness': prey.age})
+            world[prey.x_position][prey.y_position] = 'Empty'
+            prey_list.remove(prey)
 
     for predator in predator_list:
         clear((predator.x_position, predator.y_position))
@@ -107,15 +120,30 @@ def update():
             predator.take_action(prey_list)
             # Update world:
             world[predator.x_position][predator.y_position] = 'Predator'
+        else:
+            # Add to genes list:
+            predator_genes.append({'genes': predator.genes, 'fitness': predator.age})
+            world[predator.x_position][predator.y_position] = 'Empty'
+            predator_list.remove(predator)
 
 def initiaise_genes(count, genome_length=3125):
     genes_list = []
     for i in range(count):
-        genes_list.append([])
+        genes_list.append({'genes': [], 'fitness': None})
         for gene in range(genome_length):
-            genes_list[i].append(random.randint(0,3))
+            genes_list[i]['genes'].append(random.randint(0, 2))
     return genes_list
-    
+
+def draw_blockades():
+    # Draw blockades, we only need to do this once as they don't change positions:
+    for x_pos in range(len(world)):
+        for y_pos in range(len(world[0])):
+            if(world[x_pos][y_pos] == 'Block'):
+                x = x_pos*10
+                y = y_pos*10
+                pygame.draw.rect(gameDisplay, block_colour, [x, y, 10, 10])
+
+
 pygame.init()
 
 gameDisplay = pygame.display.set_mode((800,600))
@@ -126,26 +154,28 @@ pygame.display.set_icon(window_icon)
 gameExit = False
 
 x = 0
-spawn_blocks()
-if(len(prey_genes) == 0):
-    prey_genes = initiaise_genes(prey_count)
-if(len(predator_genes) == 0):
-    predator_genes = initiaise_genes(predator_count)
+prey_genes = initiaise_genes(prey_count)
+predator_genes = initiaise_genes(predator_count)
+
+new_board()
+draw_blockades()
 spawn_life()
 
-# Draw blockades, we only need to do this once as they don't change positions:
-for x_pos in range(len(world)):
-    for y_pos in range(len(world[0])):
-        if(world[x_pos][y_pos] == 'Block'):
-            x = x_pos*10
-            y = y_pos*10
-            pygame.draw.rect(gameDisplay, block_colour, [x, y, 10, 10])
-
 # Game loop:
+generation = 1
 while not gameExit:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             gameExit = True
+
+    if(len(prey_list) == 0 and len(predator_list) == 0):
+        print('Generation ' + str(generation) + ' complete')
+        print('Applying crossover/mutation with rank based selection to generate new genes')
+        generation += 1
+        food_list.clear()
+        new_board()
+        draw_blockades()
+        spawn_life()
 
     update()
     draw_world()

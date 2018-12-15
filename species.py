@@ -1,3 +1,4 @@
+from gene_functions import *
 import itertools
 
 class Species:
@@ -81,9 +82,9 @@ class Species:
                 self.y_position -= 1
 
     def die(self):
-        print(str(self) + 'died at age: ' + str(self.age))
+        # Genes list is defined in the coevolution file:
         self.dead = True
-    
+
 class Prey(Species):
     def __init__(self, genes, position, direction):
         super().__init__(genes, position, direction)         
@@ -98,9 +99,9 @@ class Prey(Species):
             self.move_left(food_list)
         elif(self.state_action_dict[self.state_string] == 2):
             self.move_right(food_list)
-        elif(self.state_action_dict[self.state_string] == 3):
-            self.stay_still()
         self.age += 1
+        if(self.age > 10000):
+            print(self.energy)
 
     def move_forward(self, food_list):
         super().move_forward()
@@ -210,9 +211,9 @@ class Predator(Species):
             self.move_left(prey_list)
         elif(self.state_action_dict[self.state_string] == 2):
             self.move_right(prey_list)
-        elif(self.state_action_dict[self.state_string] == 3):
-            self.stay_still()
         self.age += 1
+        if(self.age > 10000):
+            print(self.energy)
 
     def move_forward(self, prey_list):
         super().move_forward()
@@ -228,7 +229,7 @@ class Predator(Species):
     def move_left(self, prey_list):
         super().move_left()
         self.energy -= 0.1
-        if(self.state['F1'] == 'Prey'):
+        if(self.state['L1'] == 'Prey'):
             self.energy += 50
             prey_index = 0
             for prey in prey_list:
@@ -239,7 +240,7 @@ class Predator(Species):
     def move_right(self, prey_list):
         super().move_right()
         self.energy -= 0.1
-        if(self.state['F1'] == 'Prey'):
+        if(self.state['R1'] == 'Prey'):
             self.energy += 50
             prey_index = 0
             for prey in prey_list:
