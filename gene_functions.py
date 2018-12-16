@@ -3,7 +3,7 @@ import random
 # Genes represent an action for each agent to take for each of the possible states that the agent can be in.
 
 def rank_based_selection(population):
-    rank_proportions = [0.25, 0.15, 0.125, 0.1, 0.08, 0.075, 0.05, 0.03, 0.025, 0.02]
+    rank_proportions = [0.15, 0.1, 0.09, 0.85, 0.08, 0.07, 0.06, 0.05, 0.03, 0.025, 0.02, 0.0175, 0.015, 0.0125, 0.01]
     remaining_probability = 1.0 - sum(rank_proportions)
     remaining_items = float(len(population) - len(rank_proportions))
     # Applying this same probability to all values ranked lower than the number of items in the rank_proportions list:

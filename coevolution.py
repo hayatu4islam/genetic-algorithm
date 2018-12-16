@@ -19,7 +19,7 @@ prey_genes = []
 predator_genes = [] 
 
 prey_count = 300
-predator_count = 60
+predator_count = 100
 food_count = 200
 
 resolution = {'x': 1020, 'y': 800}
@@ -110,7 +110,8 @@ def update():
             # Add fitness to genes: 
             for specimen in prey_genes:
                 if(specimen['genes'] == prey.genes):
-                    specimen['fitness'] = prey.age
+                    # Fitness is the age at death + added fitness dependent on when it catches foos, this is to encourage more interesting behaviour:
+                    specimen['fitness'] = prey.fitness
             world[prey.x_position][prey.y_position] = 'Empty'
             prey_list.remove(prey)
 
@@ -125,7 +126,7 @@ def update():
             # Add fitness to genes: 
             for specimen in predator_genes:
                 if(specimen['genes'] == predator.genes):
-                    specimen['fitness'] = predator.age
+                    specimen['fitness'] = predator.fitness
             world[predator.x_position][predator.y_position] = 'Empty'
             predator_list.remove(predator)
 
@@ -215,7 +216,7 @@ while not gameExit:
     update()
     steps += 1
     if(steps%1000 == 0 or steps == 0):
-        print('After step number: {}, Food: {}, Prey: {}, Predators: {}'.format(steps, len(food_list), len(prey_list), len(predator_list)))
+        print('After step: {}, Food: {}, Prey: {}, Predators: {}'.format(steps, len(food_list), len(prey_list), len(predator_list)))
     draw_world()
     pygame.display.update()
     

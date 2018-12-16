@@ -8,10 +8,11 @@ class Species:
         self.direction = direction
         self.energy = 20
         self.age = 0
-        self.state_action_dict = {} # This is a dictionary from every possible state to the action that should be taken in this state.
+        self.state_action_dict = {} # This is a dictionary from every possible state to the action that should be taken.
         self.genes = genes
         self.state_string = ''
         self.dead = False
+        self.fitness = 0
 
         possible_states = [''.join(item) for item in list(itertools.product('BPYEF', repeat=5))]
         i = 0
@@ -139,6 +140,7 @@ class Prey(Species):
             else:
                 self.stay_still()
 
+        self.fitness += 1
         self.age += 1
 
     def move_forward(self, food_list):
@@ -148,6 +150,7 @@ class Prey(Species):
             self.die()
         elif(self.state['F1'] == 'Food'):
             self.energy += self.food_energy
+            self.fitness += self.age
             food_index = 0
             for food_x, food_y, eaten in food_list:
                 if(food_x == self.x_position and food_y == self.y_position):
@@ -161,6 +164,7 @@ class Prey(Species):
             self.die()
         elif(self.state['L1'] == 'Food'):
             self.energy += self.food_energy
+            self.fitness += self.age
             food_index = 0
             for food_x, food_y, eaten in food_list:
                 if(food_x == self.x_position and food_y == self.y_position):
@@ -175,6 +179,7 @@ class Prey(Species):
             self.die()
         elif(self.state['R1'] == 'Food'):
             self.energy += self.food_energy
+            self.fitness += self.age
             food_index = 0
             for food_x, food_y, eaten in food_list:
                 if(food_x == self.x_position and food_y == self.y_position):
@@ -293,9 +298,10 @@ class Predator(Species):
 
     def move_forward(self, prey_list):
         super().move_forward()
-        self.energy -= 0.75
+        self.energy -= 0.7
         if(self.state['F1'] == 'Prey'):
             self.energy += self.prey_energy
+            self.fitness += self.age
             prey_index = 0
             for prey in prey_list:
                 if(prey.x_position == self.x_position and prey.y_position == self.y_position):
@@ -304,9 +310,10 @@ class Predator(Species):
     
     def move_left(self, prey_list):
         super().move_left()
-        self.energy -= 0.75
+        self.energy -= 0.7
         if(self.state['L1'] == 'Prey'):
             self.energy += self.prey_energy
+            self.fitness += self.age
             prey_index = 0
             for prey in prey_list:
                 if(prey.x_position == self.x_position and prey.y_position == self.y_position):
@@ -315,9 +322,10 @@ class Predator(Species):
         
     def move_right(self, prey_list):
         super().move_right()
-        self.energy -= 0.75
+        self.energy -= 0.7
         if(self.state['R1'] == 'Prey'):
             self.energy += self.prey_energy
+            self.fitness += self.age
             prey_index = 0
             for prey in prey_list:
                 if(prey.x_position == self.x_position and prey.y_position == self.y_position):
