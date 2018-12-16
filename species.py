@@ -139,8 +139,6 @@ class Prey(Species):
                 self.stay_still()
 
         self.age += 1
-        if(self.age > 10000):
-            print(self.energy)
 
     def move_forward(self, food_list):
         super().move_forward()
@@ -148,7 +146,7 @@ class Prey(Species):
         if(self.state['F1'] == 'Predator'):
             self.die()
         elif(self.state['F1'] == 'Food'):
-            self.energy += 50
+            self.energy += 125
             food_index = 0
             for food_x, food_y, eaten in food_list:
                 if(food_x == self.x_position and food_y == self.y_position):
@@ -161,7 +159,7 @@ class Prey(Species):
         if(self.state['L1'] == 'Predator'):
             self.die()
         elif(self.state['L1'] == 'Food'):
-            self.energy += 50
+            self.energy += 125
             food_index = 0
             for food_x, food_y, eaten in food_list:
                 if(food_x == self.x_position and food_y == self.y_position):
@@ -175,7 +173,7 @@ class Prey(Species):
         if(self.state['R1'] == 'Predator'):
             self.die()
         elif(self.state['R1'] == 'Food'):
-            self.energy += 50
+            self.energy += 125
             food_index = 0
             for food_x, food_y, eaten in food_list:
                 if(food_x == self.x_position and food_y == self.y_position):

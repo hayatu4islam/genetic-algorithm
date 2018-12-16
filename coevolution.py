@@ -2,6 +2,7 @@
 import pygame
 import random
 import itertools
+from statistics import mean
 from species import *
 from gene_functions import *
 
@@ -18,19 +19,20 @@ food_list = []
 prey_genes = []
 predator_genes = [] 
 
-prey_count = 50
-predator_count = 20
-food_count = 80
+prey_count = 300
+predator_count = 200
+food_count = 100
 
+resolution = {'x': 960, 'y': 720}
 # Sets the initial world up with the boundary and a random set of boundary blocks:
 def new_board():
     world.clear()
     x = 0
-    for x_position in range(0, 800, 10):
+    for x_position in range(0, resolution['x'], 10):
         world.append([])
-        for y_position in range(0, 600, 10):
+        for y_position in range(0, resolution['y'], 10):
             # Boundry:
-            if(y_position == 0 or x_position == 0 or y_position == 590 or x_position == 790):
+            if(y_position == 0 or x_position == 0 or y_position == (resolution['y']-10) or x_position == (resolution['x']-10)):
                 pygame.draw.rect(gameDisplay, block_colour, [x_position, y_position, 10, 10])
                 world[x].append('Block')
             else:
@@ -148,7 +150,7 @@ def draw_blockades():
 
 pygame.init()
 
-gameDisplay = pygame.display.set_mode((800,600))
+gameDisplay = pygame.display.set_mode((resolution['x'],resolution['y']))
 pygame.display.set_caption('Coevolution')
 window_icon = pygame.image.load('icon.png')
 pygame.display.set_icon(window_icon)
@@ -174,7 +176,11 @@ while not gameExit:
     # GENERATION COMPLETE:
     if(len(prey_list) == 0 and len(predator_list) == 0): 
         steps = 0
-        print('Generation ' + str(generation) + ' complete')
+        print('\nGeneration ' + str(generation) + ' complete')
+        average_prey_fitness = mean(gene_dict['fitness'] for gene_dict in prey_genes)
+        average_predator_fitness = mean(gene_dict['fitness'] for gene_dict in predator_genes)
+        average_total_fitness = ((average_prey_fitness + average_predator_fitness) / 2)
+        print('Mean fitness values: Prey: {:.2f} Predator fitness: {:.2f} Total: {:.2f}'.format(average_prey_fitness, average_predator_fitness, average_total_fitness))
         print('Applying crossover/mutation with rank based selection to generate new genes')
         sorted_prey_genes = sorted(prey_genes, key = lambda item: item['fitness'], reverse=True)
         sorted_predator_genes = sorted(predator_genes, key = lambda item: item['fitness'], reverse=True)
@@ -213,9 +219,8 @@ while not gameExit:
 
     update()
     steps += 1
-
-    if(steps%500 == 0):
-        print('Remaining food: {}, Prey: {}, Predators: {}'.format(len(food_list), len(prey_list), len(predator_list)))
+    if(steps%1000 == 0 or steps == 0):
+        print('Step number: {}, Food: {}, Prey: {}, Predators: {}'.format(steps, len(food_list), len(prey_list), len(predator_list)))
     draw_world()
     pygame.display.update()
     
