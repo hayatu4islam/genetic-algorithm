@@ -31,9 +31,9 @@ def crossover(a_genes, b_genes):
             result.append(b_genes[gene_index])
     return result
 
-def mutate(genes, rate=0.015, possible_actions=3):
+def mutate(genes, rate=0.015, max_gene=9):
     for gene_index in range(len(genes)):
         # Randomize this gene:
         if(random.random() <= rate):
-            genes[gene_index] = random.randint(0, possible_actions-1)
+            genes[gene_index] = random.randint(0, max_gene)
     return genes

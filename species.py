@@ -90,7 +90,7 @@ class Prey(Species):
         super().__init__(genes, position, direction)         
     
     def stay_still(self):
-        self.energy -= 0.05
+        self.energy -= 0.06
 
     def take_action(self, food_list):
         if(self.state_action_dict[self.state_string] == 0):
@@ -99,6 +99,45 @@ class Prey(Species):
             self.move_left(food_list)
         elif(self.state_action_dict[self.state_string] == 2):
             self.move_right(food_list)
+        # Actions randomly select from 2-3 possibilities, this helps to prevent getting stuck in loops:
+        elif(self.state_action_dict[self.state_string] == 3):
+            if(random.random() < 0.5):
+                self.move_forward(food_list)
+            else:
+                self.move_left(food_list)
+        elif(self.state_action_dict[self.state_string] == 4):
+            if(random.random() < 0.5):
+                self.move_left(food_list)
+            else:
+                self.move_right(food_list)
+        elif(self.state_action_dict[self.state_string] == 5):
+            if(random.random() < 0.5):
+                self.move_forward(food_list)
+            else:
+                self.move_right(food_list)
+        elif(self.state_action_dict[self.state_string] == 6):
+            if(random.random() < 0.5):
+                self.move_forward(food_list)
+            else:
+                self.stay_still()
+        elif(self.state_action_dict[self.state_string] == 7):
+            if(random.random() < 0.5):
+                self.move_left(food_list)
+            else:
+                self.stay_still()
+        elif(self.state_action_dict[self.state_string] == 8):
+            if(random.random() < 0.5):
+                self.move_right(food_list)
+            else:
+                self.stay_still()
+        elif(self.state_action_dict[self.state_string] == 9):
+            if(random.random() < float(1/3)):
+                self.move_right(food_list)
+            elif(random.random() < float(2/3)):
+                self.move_left(food_list)
+            else:
+                self.stay_still()
+
         self.age += 1
         if(self.age > 10000):
             print(self.energy)
@@ -211,9 +250,46 @@ class Predator(Species):
             self.move_left(prey_list)
         elif(self.state_action_dict[self.state_string] == 2):
             self.move_right(prey_list)
+                # Actions randomly selects from 2-3 possibilities, this helps to prevent getting stuck in loops:
+        elif(self.state_action_dict[self.state_string] == 3):
+            if(random.random() < 0.5):
+                self.move_forward(prey_list)
+            else:
+                self.move_left(prey_list)
+        elif(self.state_action_dict[self.state_string] == 4):
+            if(random.random() < 0.5):
+                self.move_left(prey_list)
+            else:
+                self.move_right(prey_list)
+        elif(self.state_action_dict[self.state_string] == 5):
+            if(random.random() < 0.5):
+                self.move_forward(prey_list)
+            else:
+                self.move_right(prey_list)
+        elif(self.state_action_dict[self.state_string] == 6):
+            if(random.random() < 0.5):
+                self.move_forward(prey_list)
+            else:
+                self.stay_still()
+        elif(self.state_action_dict[self.state_string] == 7):
+            if(random.random() < 0.5):
+                self.move_left(prey_list)
+            else:
+                self.stay_still()
+        elif(self.state_action_dict[self.state_string] == 8):
+            if(random.random() < 0.5):
+                self.move_right(prey_list)
+            else:
+                self.stay_still()
+        elif(self.state_action_dict[self.state_string] == 9):
+            if(random.random() < float(1/3)):
+                self.move_right(prey_list)
+            elif(random.random() < float(2/3)):
+                self.move_left(prey_list)
+            else:
+                self.stay_still()
+
         self.age += 1
-        if(self.age > 10000):
-            print(self.energy)
 
     def move_forward(self, prey_list):
         super().move_forward()

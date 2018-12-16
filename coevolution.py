@@ -22,7 +22,7 @@ prey_count = 50
 predator_count = 20
 food_count = 80
 
-# Sets the initial world up with the boundary and and random blocks on the screen:
+# Sets the initial world up with the boundary and a random set of boundary blocks:
 def new_board():
     world.clear()
     x = 0
@@ -128,12 +128,12 @@ def update():
             world[predator.x_position][predator.y_position] = 'Empty'
             predator_list.remove(predator)
 
-def initiaise_genes(count, genome_length=3125):
+def initiaise_genes(count, genome_length=3125, max_gene=9):
     genes_list = []
     for i in range(count):
         genes_list.append({'genes': [], 'fitness': None})
         for gene in range(genome_length):
-            genes_list[i]['genes'].append(random.randint(0, 2))
+            genes_list[i]['genes'].append(random.randint(0, max_gene))
     return genes_list
 
 def draw_blockades():
@@ -165,12 +165,15 @@ spawn_life()
 
 # Game loop:
 generation = 1
+steps = 0
 while not gameExit:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             gameExit = True
 
-    if(len(prey_list) == 0 and len(predator_list) == 0):
+    # GENERATION COMPLETE:
+    if(len(prey_list) == 0 and len(predator_list) == 0): 
+        steps = 0
         print('Generation ' + str(generation) + ' complete')
         print('Applying crossover/mutation with rank based selection to generate new genes')
         sorted_prey_genes = sorted(prey_genes, key = lambda item: item['fitness'], reverse=True)
@@ -209,6 +212,10 @@ while not gameExit:
         spawn_life()
 
     update()
+    steps += 1
+
+    if(steps%500 == 0):
+        print('Remaining food: {}, Prey: {}, Predators: {}'.format(len(food_list), len(prey_list), len(predator_list)))
     draw_world()
     pygame.display.update()
     
