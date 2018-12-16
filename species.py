@@ -6,7 +6,7 @@ class Species:
         self.x_position, self.y_position = position
         self.state = {}
         self.direction = direction
-        self.energy = 20
+        self.energy = 50
         self.age = 0
         self.state_action_dict = {} # This is a dictionary from every possible state to the action that should be taken.
         self.genes = genes

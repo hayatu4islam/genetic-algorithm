@@ -18,9 +18,9 @@ food_list = []
 prey_genes = []
 predator_genes = [] 
 
-prey_count = 300
+prey_count = 200
 predator_count = 100
-food_count = 200
+food_count = 100
 
 resolution = {'x': 1020, 'y': 800}
 # Sets the initial world up with the boundary and a random set of boundary blocks:
