@@ -3,7 +3,7 @@ import random
 # Genes represent an action for each agent to take for each of the possible states that the agent can be in.
 
 def rank_based_selection(population):
-    rank_proportions = [0.35, 0.2, 0.1, 0.08, 0.05, 0.04, 0.03, 0.025, 0.015, 0.01]
+    rank_proportions = [0.25, 0.15, 0.125, 0.1, 0.08, 0.075, 0.05, 0.03, 0.025, 0.02]
     remaining_probability = 1.0 - sum(rank_proportions)
     remaining_items = float(len(population) - len(rank_proportions))
     # Applying this same probability to all values ranked lower than the number of items in the rank_proportions list:
@@ -31,9 +31,8 @@ def crossover(a_genes, b_genes):
             result.append(b_genes[gene_index])
     return result
 
-def mutate(genes, rate=0.015, max_gene=9):
+def mutate(genes, rate=0.025, max_gene=9):
     for gene_index in range(len(genes)):
-        # Randomize this gene:
         if(random.random() <= rate):
             genes[gene_index] = random.randint(0, max_gene)
     return genes

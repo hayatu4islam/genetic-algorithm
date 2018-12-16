@@ -6,7 +6,7 @@ class Species:
         self.x_position, self.y_position = position
         self.state = {}
         self.direction = direction
-        self.energy = 200
+        self.energy = 20
         self.age = 0
         self.state_action_dict = {} # This is a dictionary from every possible state to the action that should be taken in this state.
         self.genes = genes
@@ -87,10 +87,11 @@ class Species:
 
 class Prey(Species):
     def __init__(self, genes, position, direction):
-        super().__init__(genes, position, direction)         
-    
+        super().__init__(genes, position, direction)     
+        self.food_energy = 400
+            
     def stay_still(self):
-        self.energy -= 0.06
+        self.energy -= 0.2
 
     def take_action(self, food_list):
         if(self.state_action_dict[self.state_string] == 0):
@@ -142,11 +143,11 @@ class Prey(Species):
 
     def move_forward(self, food_list):
         super().move_forward()
-        self.energy -= 0.1
+        self.energy -= 0.2
         if(self.state['F1'] == 'Predator'):
             self.die()
         elif(self.state['F1'] == 'Food'):
-            self.energy += 125
+            self.energy += self.food_energy
             food_index = 0
             for food_x, food_y, eaten in food_list:
                 if(food_x == self.x_position and food_y == self.y_position):
@@ -155,11 +156,11 @@ class Prey(Species):
     
     def move_left(self, food_list):
         super().move_left()
-        self.energy -= 0.1
+        self.energy -= 0.2
         if(self.state['L1'] == 'Predator'):
             self.die()
         elif(self.state['L1'] == 'Food'):
-            self.energy += 125
+            self.energy += self.food_energy
             food_index = 0
             for food_x, food_y, eaten in food_list:
                 if(food_x == self.x_position and food_y == self.y_position):
@@ -169,11 +170,11 @@ class Prey(Species):
     
     def move_right(self, food_list):
         super().move_right()
-        self.energy -= 0.1
+        self.energy -= 0.2
         if(self.state['R1'] == 'Predator'):
             self.die()
         elif(self.state['R1'] == 'Food'):
-            self.energy += 125
+            self.energy += self.food_energy
             food_index = 0
             for food_x, food_y, eaten in food_list:
                 if(food_x == self.x_position and food_y == self.y_position):
@@ -237,9 +238,10 @@ class Prey(Species):
 class Predator(Species):
     def __init__(self, genes, position, direction):
         super().__init__(genes, position, direction)
+        self.prey_energy = 500
     
     def stay_still(self):
-        self.energy -= 0.05
+        self.energy -= 0.1
 
     def take_action(self, prey_list):
         if(self.state_action_dict[self.state_string] == 0):
@@ -291,9 +293,9 @@ class Predator(Species):
 
     def move_forward(self, prey_list):
         super().move_forward()
-        self.energy -= 0.1
+        self.energy -= 0.75
         if(self.state['F1'] == 'Prey'):
-            self.energy += 50
+            self.energy += self.prey_energy
             prey_index = 0
             for prey in prey_list:
                 if(prey.x_position == self.x_position and prey.y_position == self.y_position):
@@ -302,9 +304,9 @@ class Predator(Species):
     
     def move_left(self, prey_list):
         super().move_left()
-        self.energy -= 0.1
+        self.energy -= 0.75
         if(self.state['L1'] == 'Prey'):
-            self.energy += 50
+            self.energy += self.prey_energy
             prey_index = 0
             for prey in prey_list:
                 if(prey.x_position == self.x_position and prey.y_position == self.y_position):
@@ -313,9 +315,9 @@ class Predator(Species):
         
     def move_right(self, prey_list):
         super().move_right()
-        self.energy -= 0.1
+        self.energy -= 0.75
         if(self.state['R1'] == 'Prey'):
-            self.energy += 50
+            self.energy += self.prey_energy
             prey_index = 0
             for prey in prey_list:
                 if(prey.x_position == self.x_position and prey.y_position == self.y_position):
