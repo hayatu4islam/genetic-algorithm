@@ -19,7 +19,7 @@ prey_genes = []
 predator_genes = [] 
 
 prey_count = 200
-predator_count = 100
+predator_count = 75
 food_count = 100
 
 resolution = {'x': 1020, 'y': 800}
@@ -110,7 +110,7 @@ def update():
             # Add fitness to genes: 
             for specimen in prey_genes:
                 if(specimen['genes'] == prey.genes):
-                    # Fitness is the age at death + added fitness dependent on when it catches foos, this is to encourage more interesting behaviour:
+                    # Fitness is the age at death + added fitness dependent on when it catches food, this is to encourage more interesting behaviour:
                     specimen['fitness'] = prey.fitness
             world[prey.x_position][prey.y_position] = 'Empty'
             prey_list.remove(prey)
