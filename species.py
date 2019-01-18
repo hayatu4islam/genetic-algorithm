@@ -1,6 +1,7 @@
 from gene_functions import *
 import itertools
 
+# Copywrite James Kayes © 2018
 class Species:
     def __init__(self, genes, position, direction):
         self.x_position, self.y_position = position
