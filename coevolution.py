@@ -147,78 +147,78 @@ def draw_blockades():
                 y = y_pos*10
                 pygame.draw.rect(gameDisplay, block_colour, [x, y, 10, 10])
 
+if __name__ == "__main__":
+    pygame.init()
 
-pygame.init()
+    gameDisplay = pygame.display.set_mode((resolution['x'],resolution['y']))
+    pygame.display.set_caption('Coevolution')
+    window_icon = pygame.image.load('icon.png')
+    pygame.display.set_icon(window_icon)
 
-gameDisplay = pygame.display.set_mode((resolution['x'],resolution['y']))
-pygame.display.set_caption('Coevolution')
-window_icon = pygame.image.load('icon.png')
-pygame.display.set_icon(window_icon)
+    gameExit = False
 
-gameExit = False
+    x = 0
+    prey_genes = initiaise_genes(prey_count)
+    predator_genes = initiaise_genes(predator_count)
 
-x = 0
-prey_genes = initiaise_genes(prey_count)
-predator_genes = initiaise_genes(predator_count)
+    new_board()
+    draw_blockades()
+    spawn_life()
 
-new_board()
-draw_blockades()
-spawn_life()
+    # Game loop:
+    generation = 1
+    steps = 0
+    while not gameExit:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                gameExit = True
 
-# Game loop:
-generation = 1
-steps = 0
-while not gameExit:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            gameExit = True
-    
-    # New generation:
-    if(len(prey_list) == 0 and len(predator_list) == 0): 
-        steps = 0
-        print('\nGeneration ' + str(generation) + ' complete')
-        print('Applying crossover/mutation with rank based selection to generate new genes')
-        # Genes sorted by fitness:
-        sorted_prey_genes = sorted(prey_genes, key = lambda item: item['fitness'], reverse=True)
-        sorted_predator_genes = sorted(predator_genes, key = lambda item: item['fitness'], reverse=True)
-        for prey_index in range(len(prey_genes)):
-            # Select acording to rank based selection, remove from the list to prevent breeding with itself to increase gene diversity:
-            a_rank = rank_based_selection(sorted_prey_genes)
-            prey_dict = sorted_prey_genes.pop(a_rank)
-            prey_genes_a = prey_dict['genes']
-            # Getting the rank for the second parent from the remaining genes:
-            prey_genes_b = sorted_prey_genes[rank_based_selection(sorted_prey_genes)]['genes']
-            # Crossover applied to create a new set of genes for the next generation:
-            prey_genes[prey_index]['genes'] = mutate(crossover(prey_genes_a, prey_genes_b))
-            
-            # Re-inserting removed genes in the correct place:
-            sorted_prey_genes.insert(a_rank, prey_dict)
+        # New generation:
+        if(len(prey_list) == 0 and len(predator_list) == 0): 
+            steps = 0
+            print('\nGeneration ' + str(generation) + ' complete')
+            print('Applying crossover/mutation with rank based selection to generate new genes')
+            # Genes sorted by fitness:
+            sorted_prey_genes = sorted(prey_genes, key = lambda item: item['fitness'], reverse=True)
+            sorted_predator_genes = sorted(predator_genes, key = lambda item: item['fitness'], reverse=True)
+            for prey_index in range(len(prey_genes)):
+                # Select acording to rank based selection, remove from the list to prevent breeding with itself to increase gene diversity:
+                a_rank = rank_based_selection(sorted_prey_genes)
+                prey_dict = sorted_prey_genes.pop(a_rank)
+                prey_genes_a = prey_dict['genes']
+                # Getting the rank for the second parent from the remaining genes:
+                prey_genes_b = sorted_prey_genes[rank_based_selection(sorted_prey_genes)]['genes']
+                # Crossover applied to create a new set of genes for the next generation:
+                prey_genes[prey_index]['genes'] = mutate(crossover(prey_genes_a, prey_genes_b))
 
-        for predator_index in range(len(predator_genes)):
-            # Select rank acording to rank based selection, and remove from the list to prevent breeding with itself to increase gene diversity:
-            a_rank = rank_based_selection(sorted_predator_genes)
-            predator_dict = sorted_predator_genes.pop(a_rank)
-            predator_genes_a = predator_dict['genes']
-            # Getting the rank for the second parent from the remaining genes:
-            predator_genes_b = sorted_predator_genes[rank_based_selection(sorted_predator_genes)]['genes']
+                # Re-inserting removed genes in the correct place:
+                sorted_prey_genes.insert(a_rank, prey_dict)
 
-            # Crossover and mutation applied to create a new set of genes for the next generation:
-            predator_genes[predator_index]['genes'] = mutate(crossover(predator_genes_a, predator_genes_b))
+            for predator_index in range(len(predator_genes)):
+                # Select rank acording to rank based selection, and remove from the list to prevent breeding with itself to increase gene diversity:
+                a_rank = rank_based_selection(sorted_predator_genes)
+                predator_dict = sorted_predator_genes.pop(a_rank)
+                predator_genes_a = predator_dict['genes']
+                # Getting the rank for the second parent from the remaining genes:
+                predator_genes_b = sorted_predator_genes[rank_based_selection(sorted_predator_genes)]['genes']
 
-            # Re-inserting removed genes in the correct place:
-            sorted_predator_genes.insert(a_rank, predator_dict)
-        generation += 1
-        food_list.clear()
-        new_board()
-        draw_blockades()
-        spawn_life()
+                # Crossover and mutation applied to create a new set of genes for the next generation:
+                predator_genes[predator_index]['genes'] = mutate(crossover(predator_genes_a, predator_genes_b))
 
-    update()
-    steps += 1
-    if(steps%1000 == 0 or steps == 0):
-        print('After step: {}, Food: {}, Prey: {}, Predators: {}'.format(steps, len(food_list), len(prey_list), len(predator_list)))
-    draw_world()
-    pygame.display.update()
-    
-pygame.quit()
-quit()
+                # Re-inserting removed genes in the correct place:
+                sorted_predator_genes.insert(a_rank, predator_dict)
+            generation += 1
+            food_list.clear()
+            new_board()
+            draw_blockades()
+            spawn_life()
+
+        update()
+        steps += 1
+        if(steps%1000 == 0 or steps == 0):
+            print('After step: {}, Food: {}, Prey: {}, Predators: {}'.format(steps, len(food_list), len(prey_list), len(predator_list)))
+        draw_world()
+        pygame.display.update()
+
+    pygame.quit()
+    quit()
